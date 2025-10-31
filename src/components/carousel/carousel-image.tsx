@@ -24,7 +24,7 @@ export const CarouselImage = ({
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative size-full">
       {isLoading && (
         <div className="absolute inset-0 bg-foreground/50 animate-pulse" />
       )}
