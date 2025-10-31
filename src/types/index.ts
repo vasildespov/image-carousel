@@ -1,3 +1,6 @@
+import { HTMLAttributes } from "react";
+
+export type Orientation = HTMLAttributes<HTMLElement>["aria-orientation"];
 export type Photo = {
   id: string;
   width: number;

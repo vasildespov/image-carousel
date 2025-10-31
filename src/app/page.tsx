@@ -3,7 +3,6 @@ import { getPhotos } from "@/services/getPhotos";
 
 export default async function Home() {
   const photos = await getPhotos();
-  console.log(photos);
 
   return (
     <div className="flex min-h-screen w-full items-center">
