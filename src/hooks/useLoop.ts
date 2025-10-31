@@ -3,13 +3,13 @@ import { throttle } from "@/utils/throttle";
 import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type UseLoopProps<T extends HTMLElement> = {
+  /** ref of the list container */
+  ref: RefObject<T | null>;
   /** orientation of the list */
   orientation?: Orientation;
-  /** ref of the scroll container */
-  ref: RefObject<T | null>;
   /** total items in the list */
   dataLength: number;
-  /** total item size including gap or margin */
+  /** actual item size including gap or margin */
   effectiveItemSize: number;
   /** enables infinite looping when true */
   loop?: boolean;
@@ -18,7 +18,7 @@ type UseLoopProps<T extends HTMLElement> = {
 type UseLoopReturn = {
   /** stable scroll offset to prevent flickers during looping */
   scrollOffset: number;
-  /** client width of the scroll container */
+  /** size of the scroll container */
   scrollContainerSize: number;
   /** size in pixels of one full loop  */
   loopSize: number;
@@ -26,7 +26,7 @@ type UseLoopReturn = {
 
 const DELAY = 10;
 export const useLoop = <T extends HTMLElement = HTMLElement>({
-  // orientation,
+  orientation,
   ref,
   dataLength,
   effectiveItemSize,
@@ -34,74 +34,73 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
 }: UseLoopProps<T>): UseLoopReturn => {
   const [scrollContainerSize, setScrollContainerSize] = useState(0);
 
+  const scrollProp = orientation === "vertical" ? "scrollTop" : "scrollLeft";
+  const sizeProp = orientation === "vertical" ? "clientHeight" : "clientWidth";
   const loopSize = dataLength * effectiveItemSize;
-  const loopStart = loopSize;
   const loopEnd = 2 * loopSize;
-
-  const initialOffset = loop ? loopStart : 0;
+  const initialOffset = loop ? loopSize : 0;
   const [scrollOffset, setScrollOffset] = useState(initialOffset);
-  const scrollOffsetRef = useRef(scrollOffset);
+  const scrollOffsetRef = useRef(initialOffset);
 
   useLayoutEffect(() => {
     const container = ref.current;
     if (!container || !loop || dataLength === 0) return;
 
     if (scrollContainerSize === 0) {
-      setScrollContainerSize(container.clientWidth);
+      setScrollContainerSize(container[sizeProp]);
     }
 
-    const currentScrollLeft = scrollOffsetRef.current;
-    let newScrollLeft = currentScrollLeft;
+    const currentScrollOffset = scrollOffsetRef.current;
+    let newScrollOffset = currentScrollOffset;
 
-    if (currentScrollLeft < loopStart) {
-      newScrollLeft = currentScrollLeft + loopSize;
-    } else if (currentScrollLeft >= loopEnd) {
-      newScrollLeft = currentScrollLeft - loopSize;
+    if (currentScrollOffset < loopSize) {
+      newScrollOffset = currentScrollOffset + loopSize;
+    } else if (currentScrollOffset >= loopEnd) {
+      newScrollOffset = currentScrollOffset - loopSize;
     }
 
-    container.scrollLeft = newScrollLeft;
-    setScrollOffset(newScrollLeft);
-
-    if (newScrollLeft !== currentScrollLeft) {
-      container.scrollLeft = newScrollLeft;
-      setScrollOffset(newScrollLeft);
+    if (newScrollOffset !== currentScrollOffset) {
+      container[scrollProp] = newScrollOffset;
+      scrollOffsetRef.current = newScrollOffset;
+      setScrollOffset(newScrollOffset);
     }
   }, [
     scrollOffset,
     loop,
     loopSize,
-    loopStart,
     loopEnd,
     dataLength,
     ref,
     scrollContainerSize,
+    sizeProp,
+    scrollProp,
   ]);
 
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
 
+    if (loop && dataLength > 0 && container[scrollProp] !== loopSize) {
+      container[scrollProp] = loopSize;
+    }
+
     const handleScroll = throttle(() => {
-      scrollOffsetRef.current = container.scrollLeft;
-      setScrollOffset(container.scrollLeft);
+      scrollOffsetRef.current = container[scrollProp];
+      setScrollOffset(container[scrollProp]);
     }, DELAY);
 
     const observer = new ResizeObserver((entries) => {
-      setScrollContainerSize(entries[0].target.clientWidth);
+      setScrollContainerSize(entries[0].target[sizeProp]);
     });
 
     container.addEventListener("scroll", handleScroll, { passive: true });
     observer.observe(container);
 
-    if (loop && dataLength > 0 && container.scrollLeft !== loopStart) {
-      container.scrollLeft = loopStart;
-    }
-
     return () => {
       container.removeEventListener("scroll", handleScroll);
       observer.unobserve(container);
     };
-  }, [ref, loop, dataLength, loopStart]);
+  }, [ref, loop, dataLength, loopSize, scrollProp, sizeProp]);
 
   return { scrollOffset, scrollContainerSize, loopSize };
 };
