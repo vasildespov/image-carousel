@@ -10,13 +10,13 @@ export const CarouselContainer = ({
     <div
       className={cn(
         "group/carousel carousel",
-        "whitespace-nowrap overflow-x-scroll focus-visible:outline-none",
+        "whitespace-nowrap aria-[orientation=horizontal]:h-fit aria-[orientation=vertical]:w-fit aria-[orientation=vertical]:overflow-y-scroll aria-[orientation=horizontal]:overflow-x-scroll focus-visible:outline-none",
         className,
       )}
       {...props}
     >
       <div className="relative group-[&[aria-orientation=horizontal]]/carousel:w-(--total-size) group-[&[aria-orientation=vertical]]/carousel:h-(--total-size)">
-        <ul className="flex w-fit will-change-transform transform-(--transform)">
+        <ul className="flex group-[&[aria-orientation=vertical]]/carousel:flex-col size-fit will-change-transform transform-(--transform)">
           {children}
         </ul>
       </div>
