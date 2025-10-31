@@ -5,16 +5,16 @@ import { CarouselImage } from "@/components/carousel/carousel-image";
 import { CarouselItem } from "@/components/carousel/carousel-item";
 import { useVirtualisation } from "@/hooks/useVirtualisation";
 import { Orientation, Photo } from "@/types";
-import { ComponentProps, CSSProperties } from "react";
+import { ComponentProps, useRef } from "react";
 
 interface CarouselProps extends ComponentProps<"div"> {
   /** enables infinite looping when true */
   loop?: boolean;
-  /** gap between carousel items */
+  /** gap between list items */
   gap?: number;
   /** orientation of the list */
   orientation?: Orientation;
-  /** size of each item in pixels */
+  /** size of each list item in pixels */
   itemSize?: number;
   /** data rendered in the list */
   data: Photo[];
@@ -23,17 +23,17 @@ interface CarouselProps extends ComponentProps<"div"> {
 const GAP = 0;
 const ITEM_SIZE = 300;
 const Carousel = ({
-  gap = GAP,
   orientation = "horizontal",
   loop = true,
+  gap = GAP,
   itemSize = ITEM_SIZE,
   data,
   ...props
 }: CarouselProps) => {
-  const { ref, translate, totalSize, visibleData } = useVirtualisation<
-    Photo,
-    HTMLDivElement
-  >({
+  const ref = useRef<HTMLDivElement>(null);
+
+  const { visibleData } = useVirtualisation<Photo, HTMLDivElement>({
+    ref,
     orientation,
     gap,
     data,
@@ -46,21 +46,10 @@ const Carousel = ({
   }
 
   return (
-    <CarouselContainer
-      aria-orientation={orientation}
-      style={
-        {
-          "--item-size": `${ITEM_SIZE}px`,
-          "--total-size": totalSize,
-          "--transform": translate,
-        } as CSSProperties
-      }
-      ref={ref}
-      {...props}
-    >
+    <CarouselContainer aria-orientation={orientation} ref={ref} {...props}>
       {visibleData.map(({ download_url, id }) => (
         <CarouselItem key={id}>
-          <CarouselImage src={download_url} alt={id} />
+          <CarouselImage src={download_url} loading="eager" alt="" />
         </CarouselItem>
       ))}
     </CarouselContainer>
