@@ -2,8 +2,9 @@
 
 ## Summary
 
-This is my implementation of list virtualisation.
+This is my implementation of image carousel and list virtualisation.
 It includes two hooks: `useVirtualisation` and `useLoop` and also a pre-built component - `ImageCarousel`.
+The project's been setup with NextJS and Tailwind CSS. The hook could work with any css solution.
 
 **Features:**
 
@@ -11,6 +12,7 @@ It includes two hooks: `useVirtualisation` and `useLoop` and also a pre-built co
 - Supports infinite looping
 - Supports orientation (horizontal/vertical)
 - Configurable item sizing and gaps
+- Reusable headless hook and component
 
 ---
 
