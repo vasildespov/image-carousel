@@ -1,6 +1,6 @@
 "use client";
 
-import { useVirtualisation } from "@/hooks/useVirtualisation";
+import { useVirtualisation } from "@/hooks/use-virtualisation";
 import { useMemo, useRef } from "react";
 
 export const VirtualisedList = () => {

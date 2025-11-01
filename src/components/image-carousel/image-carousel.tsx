@@ -3,7 +3,7 @@
 import { CarouselContainer } from "@/components/image-carousel/carousel-container";
 import { CarouselImage } from "@/components/image-carousel/carousel-image";
 import { CarouselItem } from "@/components/image-carousel/carousel-item";
-import { useVirtualisation } from "@/hooks/useVirtualisation";
+import { useVirtualisation } from "@/hooks/use-virtualisation";
 import { cn } from "@/lib/utils";
 import { Orientation, Photo } from "@/types";
 import { ComponentProps, useRef } from "react";

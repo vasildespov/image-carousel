@@ -1,4 +1,8 @@
-import { useLoop } from "@/hooks/useLoop";
+import { useLoop } from "@/hooks/use-loop";
+import {
+  getContainerStyle,
+  getWrapperStyle,
+} from "@/hooks/use-virtualisation.utils";
 import { Orientation } from "@/types";
 import { CSSProperties, RefObject, useMemo } from "react";
 
@@ -21,8 +25,8 @@ const OVERSCAN = 5;
 const DEFAULT_GAP = 0;
 export const useVirtualisation = <D, T extends HTMLElement>({
   gap = DEFAULT_GAP,
-  loop,
-  orientation,
+  orientation = "horizontal",
+  loop = false,
   ref,
   itemSize,
   data,
@@ -71,34 +75,21 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     return result;
   }, [loop, dataLength, startIndex, visibleItemsCount, data]);
 
-  const containerStyle = useMemo((): CSSProperties => {
-    const sizeProperty = orientation === "horizontal" ? "width" : "height";
-    const totalSize = loop
-      ? 3 * loopSize
-      : dataLength * effectiveItemSize - gap;
+  const containerStyle = getContainerStyle(
+    orientation,
+    loop,
+    loopSize,
+    dataLength,
+    effectiveItemSize,
+    gap,
+  );
 
-    return {
-      [sizeProperty]: `${totalSize}px`,
-      position: "relative",
-    };
-  }, [loop, loopSize, dataLength, effectiveItemSize, gap, orientation]);
-
-  const wrapperStyle = useMemo((): CSSProperties => {
-    const translateValue = startIndex * effectiveItemSize;
-    const translateAxis = orientation === "vertical" ? "Y" : "X";
-    const flexDirection = orientation === "horizontal" ? "row" : "column";
-
-    return {
-      ...(orientation === "horizontal"
-        ? { width: "fit-content" }
-        : { height: "fit-content" }),
-      display: "flex",
-      flexDirection: flexDirection,
-      gap: gap,
-      transform: `translate${translateAxis}(${translateValue}px)`,
-      willChange: "transform",
-    };
-  }, [startIndex, effectiveItemSize, orientation, gap]);
+  const wrapperStyle = getWrapperStyle(
+    orientation,
+    startIndex,
+    effectiveItemSize,
+    gap,
+  );
 
   return {
     visibleData,
