@@ -1,10 +1,6 @@
-import { HTMLAttributes } from "react";
-
-export type Orientation = HTMLAttributes<HTMLElement>["aria-orientation"];
+export type Orientation = "vertical" | "horizontal";
 export type Photo = {
   id: string;
-  width: number;
-  height: number;
   download_url: string;
 };
 
