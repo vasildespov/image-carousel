@@ -8,18 +8,16 @@ import { ComponentProps, useState } from "react";
 const IMAGE_URL_CACHE = new Set<string>();
 
 export const CarouselImage = ({
+  src,
   className,
   ...props
 }: ComponentProps<typeof NextImage>) => {
-  // handle case where props.src is static import
-  const src =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    typeof props.src === "string" ? props.src : (props.src as any)?.src || "";
-
-  const [isLoading, setIsLoading] = useState(!IMAGE_URL_CACHE.has(src));
+  const [isLoading, setIsLoading] = useState(
+    !IMAGE_URL_CACHE.has(src as string),
+  );
 
   const handleOnLoad = () => {
-    IMAGE_URL_CACHE.add(src);
+    IMAGE_URL_CACHE.add(src as string);
     setIsLoading(false);
   };
 
@@ -36,6 +34,7 @@ export const CarouselImage = ({
           className,
         )}
         onLoad={handleOnLoad}
+        src={src}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
         {...props}
