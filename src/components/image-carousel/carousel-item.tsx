@@ -5,8 +5,7 @@ export const CarouselItem = ({ className, ...props }: ComponentProps<"li">) => {
   return (
     <li
       className={cn(
-        "size-(--item-size)",
-        "aspect-square flex relative items-center justify-center",
+        "aspect-square border flex relative items-center justify-center",
         className,
       )}
       {...props}
