@@ -1,37 +1,32 @@
 import { useLoop } from "@/hooks/useLoop";
 import { Orientation } from "@/types";
-import { RefObject, useLayoutEffect, useMemo } from "react";
+import { CSSProperties, RefObject, useMemo } from "react";
 
 type UseVirtualisationProps<D, T extends HTMLElement> = {
-  /** orientation of the list */
   orientation?: Orientation;
-  /** gap between list items */
-  gap: number;
-  /** size of each list item in pixels */
+  gap?: number;
   itemSize: number;
-  /** data rendered in the list */
   data: D[];
-  /** enables infinite looping when true */
   loop?: boolean;
-  /** ref of the list container */
   ref: RefObject<T | null>;
 };
 
 type UseVirtualisationReturn<D> = {
-  /** list items that will be rendered */
-  visibleData: D[];
+  containerStyle: CSSProperties;
+  wrapperStyle: CSSProperties;
+  visibleData: { index: number; data: D }[];
 };
 
-const BUFFER = 3;
+const OVERSCAN = 5;
+const DEFAULT_GAP = 0;
 export const useVirtualisation = <D, T extends HTMLElement>({
+  gap = DEFAULT_GAP,
   loop,
   orientation,
   ref,
-  gap,
   itemSize,
   data,
 }: UseVirtualisationProps<D, T>): UseVirtualisationReturn<D> => {
-  const translateAxis = orientation === "vertical" ? "Y" : "X";
   const dataLength = data.length;
   const effectiveItemSize = itemSize + gap;
 
@@ -43,47 +38,71 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     loop,
   });
 
-  const visibleItemsCount = useMemo(() => {
-    return Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * BUFFER;
-  }, [effectiveItemSize, scrollContainerSize]);
-
   const startIndex = useMemo(() => {
     const firstIndex = Math.max(
       0,
       Math.floor(scrollOffset / effectiveItemSize),
     );
 
-    return loop ? firstIndex - BUFFER : Math.max(0, firstIndex - BUFFER);
+    return loop ? firstIndex - OVERSCAN : Math.max(0, firstIndex - OVERSCAN);
   }, [scrollOffset, effectiveItemSize, loop]);
 
+  const visibleItemsCount = useMemo(() => {
+    return Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
+  }, [effectiveItemSize, scrollContainerSize]);
+
   const visibleData = useMemo(() => {
-    if (!loop || dataLength === 0) {
+    if (!loop) {
       const endIndex = startIndex + visibleItemsCount;
-      return data.slice(startIndex, Math.min(endIndex, dataLength));
+      const visible = data.slice(startIndex, Math.min(endIndex, dataLength));
+
+      return visible.map((value, index) => ({
+        data: value,
+        index: index,
+      }));
     }
 
-    const result: D[] = [];
+    const result: { index: number; data: D }[] = [];
     for (let i = 0; i < visibleItemsCount; i++) {
       let dataIndex = (startIndex + i) % dataLength;
       if (dataIndex < 0) dataIndex += dataLength;
-      result.push({ ...data[dataIndex], id: startIndex + i });
+      result.push({ data: data[dataIndex], index: startIndex + i });
     }
     return result;
-  }, [startIndex, visibleItemsCount, data, loop, dataLength]);
+  }, [loop, dataLength, startIndex, visibleItemsCount, data]);
 
-  const translate = `translate${translateAxis}(${startIndex * effectiveItemSize}px)`;
-  const totalSize = `${loop ? 3 * loopSize : dataLength * effectiveItemSize - gap}px`;
+  const containerStyle = useMemo((): CSSProperties => {
+    const sizeProperty = orientation === "horizontal" ? "width" : "height";
+    const totalSize = loop
+      ? 3 * loopSize
+      : dataLength * effectiveItemSize - gap;
 
-  useLayoutEffect(() => {
-    const container = ref.current;
-    if (!container) return;
+    return {
+      [sizeProperty]: `${totalSize}px`,
+      position: "relative",
+    };
+  }, [loop, loopSize, dataLength, effectiveItemSize, gap, orientation]);
 
-    container.style.setProperty("--item-size", `${itemSize}px`);
-    container.style.setProperty("--total-size", totalSize);
-    container.style.setProperty("--transform", translate);
-  }, [ref, itemSize, totalSize, translate]);
+  const wrapperStyle = useMemo((): CSSProperties => {
+    const translateValue = startIndex * effectiveItemSize;
+    const translateAxis = orientation === "vertical" ? "Y" : "X";
+    const flexDirection = orientation === "horizontal" ? "row" : "column";
+
+    return {
+      ...(orientation === "horizontal"
+        ? { width: "fit-content" }
+        : { height: "fit-content" }),
+      display: "flex",
+      flexDirection: flexDirection,
+      gap: gap,
+      transform: `translate${translateAxis}(${translateValue}px)`,
+      willChange: "transform",
+    };
+  }, [startIndex, effectiveItemSize, orientation, gap]);
 
   return {
     visibleData,
+    containerStyle,
+    wrapperStyle,
   };
 };
