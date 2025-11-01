@@ -13,7 +13,7 @@
 }
 
 @layer components {
-  .carousel {
+  .hide-scrollbar {
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
@@ -27,6 +27,10 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+html {
+  overscroll-behavior: none;
 }
 
 body {
