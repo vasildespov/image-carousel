@@ -21,7 +21,7 @@ export const VirtualisedList = () => {
           {visibleData.map(({ data, index }) => (
             <li
               key={index}
-              className="size-[60px] items-center justify-center flex border w-full"
+              className="size-15 items-center justify-center flex border w-full"
             >
               {data}
             </li>

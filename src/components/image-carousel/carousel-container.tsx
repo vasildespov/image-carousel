@@ -9,7 +9,6 @@ export const CarouselContainer = ({
   return (
     <div
       className={cn(
-        "group/carousel",
         "whitespace-nowrap overflow-auto aria-[orientation=horizontal]:h-fit aria-[orientation=vertical]:w-fit focus-visible:outline-none",
         className,
       )}
