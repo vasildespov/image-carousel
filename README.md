@@ -117,7 +117,7 @@ The loop works by creating multiple virtual copies of your data:
 0          loopSize   2×loopSize
 ```
 
-When the user scrolls to the edge, the scroll position is adjusted, creating the illusion of infinite scrolling.
+When the user scrolls to the edge, the scroll position is adjusted, creating the illusion of infinite scrolling. The onScroll callback is not being throttled because it has to be as responsive as possible. Even a small delay of like 16ms causes minor bugs in scroll syncing.
 
 ---
 
