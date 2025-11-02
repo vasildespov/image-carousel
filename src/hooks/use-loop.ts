@@ -35,7 +35,8 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
 
   useLayoutEffect(() => {
     const container = ref.current;
-    if (!container || !loop || dataLength === 0) return;
+    if (!container || !loop || dataLength === 0 || effectiveItemSize <= 0)
+      return;
 
     const currentScrollOffset = scrollOffsetRef.current;
     let newScrollOffset = currentScrollOffset;
@@ -52,11 +53,20 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setScrollOffset(newScrollOffset);
     }
-  }, [dataLength, loop, loopEnd, loopSize, ref, scrollOffset, scrollProp]);
+  }, [
+    dataLength,
+    effectiveItemSize,
+    loop,
+    loopEnd,
+    loopSize,
+    ref,
+    scrollOffset,
+    scrollProp,
+  ]);
 
   useEffect(() => {
     const container = ref.current;
-    if (!container) return;
+    if (!container || dataLength === 0 || effectiveItemSize <= 0) return;
 
     if (loop && dataLength > 0 && container[scrollProp] !== loopSize) {
       container[scrollProp] = loopSize;
@@ -78,7 +88,15 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
       container.removeEventListener("scroll", handleScroll);
       observer.unobserve(container);
     };
-  }, [ref, loop, dataLength, loopSize, scrollProp, sizeProp]);
+  }, [
+    ref,
+    loop,
+    dataLength,
+    loopSize,
+    scrollProp,
+    sizeProp,
+    effectiveItemSize,
+  ]);
 
   return { scrollOffset, scrollContainerSize, loopSize };
 };

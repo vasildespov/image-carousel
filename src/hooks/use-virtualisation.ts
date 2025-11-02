@@ -56,13 +56,15 @@ export const useVirtualisation = <D, T extends HTMLElement>({
   }, [effectiveItemSize, scrollContainerSize]);
 
   const visibleData = useMemo(() => {
+    if (dataLength === 0) return [];
+
     if (!loop) {
       const endIndex = startIndex + visibleItemsCount;
       const visible = data.slice(startIndex, Math.min(endIndex, dataLength));
 
       return visible.map((value, index) => ({
         data: value,
-        index: index,
+        index: index + startIndex,
       }));
     }
 
@@ -90,6 +92,10 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     effectiveItemSize,
     gap,
   );
+
+  if (dataLength === 0 || effectiveItemSize <= 0) {
+    return { visibleData: [], containerStyle: {}, wrapperStyle: {} };
+  }
 
   return {
     visibleData,

@@ -36,7 +36,7 @@ export const ImageCarousel = ({
     itemSize,
   });
 
-  if (!data.length) {
+  if (!visibleData.length) {
     return null;
   }
 
