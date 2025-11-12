@@ -24,6 +24,7 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
 }: UseLoopProps<T>): UseLoopReturn => {
   const scrollProp = orientation === "vertical" ? "scrollTop" : "scrollLeft";
   const sizeProp = orientation === "vertical" ? "clientHeight" : "clientWidth";
+  const rafId = useRef<number | null>(null);
 
   const loopSize = dataLength * effectiveItemSize;
   const loopEnd = 2 * loopSize;
@@ -74,7 +75,12 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
 
     const handleScroll = () => {
       scrollOffsetRef.current = container[scrollProp];
-      setScrollOffset(container[scrollProp]);
+      if (!rafId.current) {
+        rafId.current = requestAnimationFrame(() => {
+          setScrollOffset(scrollOffsetRef.current);
+          rafId.current = null;
+        });
+      }
     };
 
     const observer = new ResizeObserver((entries) => {
