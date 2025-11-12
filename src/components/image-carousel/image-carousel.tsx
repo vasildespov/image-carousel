@@ -49,9 +49,12 @@ export const ImageCarousel = ({
     >
       <div style={containerStyle}>
         <ul style={wrapperStyle}>
-          {visibleData.map(({ data, index }) => (
+          {visibleData.map(({ data: image, index }) => (
             <CarouselItem key={index} style={{ width: itemSize }}>
-              <CarouselImage alt="" src={data.download_url} />
+              <CarouselImage
+                alt={`Photo ${index + 1} of ${data.length}`}
+                src={image.download_url}
+              />
             </CarouselItem>
           ))}
         </ul>
