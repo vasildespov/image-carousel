@@ -42,18 +42,13 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     loop,
   });
 
-  const startIndex = useMemo(() => {
-    const firstIndex = Math.max(
-      0,
-      Math.floor(scrollOffset / effectiveItemSize),
-    );
+  const firstIndex = Math.max(0, Math.floor(scrollOffset / effectiveItemSize));
+  const startIndex = loop
+    ? firstIndex - OVERSCAN
+    : Math.max(0, firstIndex - OVERSCAN);
 
-    return loop ? firstIndex - OVERSCAN : Math.max(0, firstIndex - OVERSCAN);
-  }, [scrollOffset, effectiveItemSize, loop]);
-
-  const visibleItemsCount = useMemo(() => {
-    return Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
-  }, [effectiveItemSize, scrollContainerSize]);
+  const visibleItemsCount =
+    Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
 
   const visibleData = useMemo(() => {
     if (dataLength === 0) return [];
