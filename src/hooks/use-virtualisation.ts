@@ -47,30 +47,46 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     ? firstIndex - OVERSCAN
     : Math.max(0, firstIndex - OVERSCAN);
 
-  const visibleItemsCount =
-    Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
+  const visibleRange = useMemo(() => {
+    const start = Math.max(
+      0,
+      Math.floor(scrollOffset / effectiveItemSize) - OVERSCAN,
+    );
+    const count =
+      Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
+    return { start, count };
+  }, [scrollOffset, effectiveItemSize, scrollContainerSize]);
 
   const visibleData = useMemo(() => {
     if (dataLength === 0) return [];
 
-    if (!loop) {
-      const endIndex = startIndex + visibleItemsCount;
-      const visible = data.slice(startIndex, Math.min(endIndex, dataLength));
+    const { start: startIndex, count: visibleItemsCount } = visibleRange;
 
-      return visible.map((value, index) => ({
-        data: value,
-        index: index + startIndex,
-      }));
+    if (!loop) {
+      const endIndex = Math.min(startIndex + visibleItemsCount, dataLength);
+      const actualStart = Math.max(0, startIndex);
+
+      const result = new Array(endIndex - actualStart);
+      for (let i = 0; i < result.length; i++) {
+        result[i] = {
+          data: data[actualStart + i],
+          index: actualStart + i,
+        };
+      }
+      return result;
     }
 
-    const result: { index: number; data: D }[] = [];
+    const result = new Array(visibleItemsCount);
     for (let i = 0; i < visibleItemsCount; i++) {
-      let dataIndex = (startIndex + i) % dataLength;
-      if (dataIndex < 0) dataIndex += dataLength;
-      result.push({ data: data[dataIndex], index: startIndex + i });
+      const dataIndex =
+        (((startIndex + i) % dataLength) + dataLength) % dataLength;
+      result[i] = {
+        data: data[dataIndex],
+        index: startIndex + i,
+      };
     }
     return result;
-  }, [loop, dataLength, startIndex, visibleItemsCount, data]);
+  }, [loop, dataLength, visibleRange, data]);
 
   const containerStyle = getContainerStyle(
     orientation,
