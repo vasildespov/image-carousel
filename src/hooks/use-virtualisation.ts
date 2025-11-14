@@ -88,21 +88,11 @@ export const useVirtualisation = <D, T extends HTMLElement>({
     return result;
   }, [loop, dataLength, visibleRange, data]);
 
-  const containerStyle = getContainerStyle(
-    orientation,
-    loop,
-    loopSize,
-    dataLength,
-    effectiveItemSize,
-    gap,
-  );
+  const totalSize = loop ? 3 * loopSize : dataLength * effectiveItemSize - gap;
+  const containerStyle = getContainerStyle({ orientation, totalSize });
 
-  const wrapperStyle = getWrapperStyle(
-    orientation,
-    startIndex,
-    effectiveItemSize,
-    gap,
-  );
+  const translateValue = startIndex * effectiveItemSize;
+  const wrapperStyle = getWrapperStyle({ orientation, gap, translateValue });
 
   if (dataLength === 0 || effectiveItemSize <= 0) {
     return { visibleData: [], containerStyle: {}, wrapperStyle: {} };

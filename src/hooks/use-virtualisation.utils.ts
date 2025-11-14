@@ -1,16 +1,15 @@
 import { Orientation } from "@/types";
 import { CSSProperties } from "react";
 
-export const getContainerStyle = (
-  orientation: Orientation,
-  loop: boolean,
-  loopSize: number,
-  dataLength: number,
-  effectiveItemSize: number,
-  gap: number,
-): CSSProperties => {
+interface GetContainerStyleProps {
+  orientation: Orientation;
+  totalSize: number;
+}
+export const getContainerStyle = ({
+  orientation,
+  totalSize,
+}: GetContainerStyleProps): CSSProperties => {
   const sizeProperty = orientation === "horizontal" ? "width" : "height";
-  const totalSize = loop ? 3 * loopSize : dataLength * effectiveItemSize - gap;
 
   return {
     [sizeProperty]: `${totalSize}px`,
@@ -18,13 +17,16 @@ export const getContainerStyle = (
   };
 };
 
-export const getWrapperStyle = (
-  orientation: Orientation,
-  startIndex: number,
-  effectiveItemSize: number,
-  gap: number,
-): CSSProperties => {
-  const translateValue = startIndex * effectiveItemSize;
+interface GetWrapperStyleProps {
+  orientation: Orientation;
+  translateValue: number;
+  gap: number;
+}
+export const getWrapperStyle = ({
+  orientation,
+  translateValue,
+  gap,
+}: GetWrapperStyleProps): CSSProperties => {
   const translateAxis = orientation === "vertical" ? "Y" : "X";
   const flexDirection = orientation === "horizontal" ? "row" : "column";
 
