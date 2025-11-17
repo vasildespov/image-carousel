@@ -51,19 +51,10 @@ export const useLoop = <T extends HTMLElement = HTMLElement>({
     if (newScrollOffset !== currentScrollOffset) {
       container[scrollProp] = newScrollOffset;
       scrollOffsetRef.current = newScrollOffset;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setScrollOffset(newScrollOffset);
     }
-  }, [
-    dataLength,
-    effectiveItemSize,
-    loop,
-    loopEnd,
-    loopSize,
-    ref,
-    scrollOffset,
-    scrollProp,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollOffset]);
 
   useEffect(() => {
     const container = ref.current;
