@@ -36,8 +36,8 @@ export const ImageCarousel = ({
     itemSize,
   });
 
-  if (!visibleData.length) {
-    return null;
+  if (!data || !data.length) {
+    return <span>No images to display</span>;
   }
 
   return (

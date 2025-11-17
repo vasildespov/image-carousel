@@ -8,6 +8,7 @@ export const CarouselContainer = ({
 }: ComponentProps<"div">) => {
   return (
     <div
+      role="region"
       className={cn(
         "whitespace-nowrap overflow-auto aria-[orientation=horizontal]:h-fit aria-[orientation=vertical]:w-fit focus-visible:outline-none",
         className,
