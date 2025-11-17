@@ -1,9 +1,9 @@
+import { ImageUrlCache } from "@/components/image-carousel/image-url-cache";
 import { cn } from "@/lib/utils";
 import NextImage from "next/image";
 import { ComponentProps, useState } from "react";
 
-const IMAGE_URL_CACHE = new Set<string>();
-
+const IMAGE_URL_CACHE = new ImageUrlCache();
 export const CarouselImage = ({
   src,
   className,
