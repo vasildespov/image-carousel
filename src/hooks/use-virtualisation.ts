@@ -13,6 +13,7 @@ type UseVirtualisationProps<D, T extends HTMLElement> = {
   data: D[];
   loop?: boolean;
   ref: RefObject<T | null>;
+  overscan?: number;
 };
 
 type UseVirtualisationReturn<D> = {
@@ -24,6 +25,7 @@ type UseVirtualisationReturn<D> = {
 const OVERSCAN = 5;
 const DEFAULT_GAP = 0;
 export const useVirtualisation = <D, T extends HTMLElement>({
+  overscan = OVERSCAN,
   gap = DEFAULT_GAP,
   orientation = "horizontal",
   loop = false,
@@ -44,27 +46,22 @@ export const useVirtualisation = <D, T extends HTMLElement>({
 
   const firstIndex = Math.max(0, Math.floor(scrollOffset / effectiveItemSize));
   const startIndex = loop
-    ? firstIndex - OVERSCAN
-    : Math.max(0, firstIndex - OVERSCAN);
-
-  const visibleRange = useMemo(() => {
-    const start = Math.max(
-      0,
-      Math.floor(scrollOffset / effectiveItemSize) - OVERSCAN,
-    );
-    const count =
-      Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * OVERSCAN;
-    return { start, count };
-  }, [scrollOffset, effectiveItemSize, scrollContainerSize]);
+    ? firstIndex - overscan
+    : Math.max(0, firstIndex - overscan);
 
   const visibleData = useMemo(() => {
     if (dataLength === 0) return [];
 
-    const { start: startIndex, count: visibleItemsCount } = visibleRange;
+    const start = Math.max(
+      0,
+      Math.floor(scrollOffset / effectiveItemSize) - overscan,
+    );
+    const visibleItemsCount =
+      Math.ceil(scrollContainerSize / effectiveItemSize) + 2 * overscan;
 
     if (!loop) {
-      const endIndex = Math.min(startIndex + visibleItemsCount, dataLength);
-      const actualStart = Math.max(0, startIndex);
+      const endIndex = Math.min(start + visibleItemsCount, dataLength);
+      const actualStart = Math.max(0, start);
 
       const result = new Array(endIndex - actualStart);
       for (let i = 0; i < result.length; i++) {
@@ -78,15 +75,22 @@ export const useVirtualisation = <D, T extends HTMLElement>({
 
     const result = new Array(visibleItemsCount);
     for (let i = 0; i < visibleItemsCount; i++) {
-      const dataIndex =
-        (((startIndex + i) % dataLength) + dataLength) % dataLength;
+      const dataIndex = (((start + i) % dataLength) + dataLength) % dataLength;
       result[i] = {
         data: data[dataIndex],
-        index: startIndex + i,
+        index: start + i,
       };
     }
     return result;
-  }, [loop, dataLength, visibleRange, data]);
+  }, [
+    dataLength,
+    scrollOffset,
+    effectiveItemSize,
+    overscan,
+    scrollContainerSize,
+    loop,
+    data,
+  ]);
 
   const totalSize = loop ? 3 * loopSize : dataLength * effectiveItemSize - gap;
   const containerStyle = getContainerStyle({ orientation, totalSize });
