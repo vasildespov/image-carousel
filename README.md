@@ -17,14 +17,15 @@ The project's been setup with NextJS and Tailwind CSS. The hook could work with 
 ---
 
 ## Example
-```jsx
+
+```typescript
 "use client";
 
 import { useVirtualisation } from "@/hooks/use-virtualisation";
 import { useMemo, useRef } from "react";
 
 export const VirtualisedList = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>null;
   const data = useMemo(() => Array.from(Array(99999).keys()), []);
 
   const { visibleData, wrapperStyle, containerStyle } = useVirtualisation({
@@ -40,8 +41,7 @@ export const VirtualisedList = () => {
         <ul style={wrapperStyle}> // apply wrapper styles
           {visibleData.map(({ data, index }) => (
             <li
-              // use index from hook as React key
-              key={index}
+              key={index} // use index from hook as React key
               className="size-15 items-center justify-center flex border w-full" // item size styles must match the itemSize input to the hook
             >
               {data}
@@ -57,7 +57,9 @@ export const VirtualisedList = () => {
 ## Core hooks
 
 ### `useVirtualisation`
+
 The main hook that calculates which items should be rendered. It can be used to build custom implementations.
+
 ```typescript
 type UseVirtualisationProps<D, T extends HTMLElement> = {
   orientation?: Orientation; // orientation of the list
@@ -66,6 +68,7 @@ type UseVirtualisationProps<D, T extends HTMLElement> = {
   data: D[]; // list of items to virtualise
   loop?: boolean; // enable infinite scrolling (default: false)
   ref: RefObject<T | null>; // ref to scroll container
+  overscan?: number;
 };
 
 type UseVirtualisationReturn<D> = {
@@ -76,6 +79,7 @@ type UseVirtualisationReturn<D> = {
 ```
 
 #### Hook logic
+
 1. Tracks scroll position via `useLoop` hook
 2. Calculates visible range based on scroll offset and container size
 3. Adds overscan buffer (5 items by default) for smoother scrolling
@@ -83,10 +87,13 @@ type UseVirtualisationReturn<D> = {
 5. Returns only the items that should be rendered
 6. Visible data contains an index property which can be used as React key (important for looping where there can be duplicate items)
 7. Returns style objects for flexibility
+
 ---
 
 ### `useLoop`
+
 Handles infinite scrolling behavior by managing scroll position.
+
 ```typescript
 type UseLoopProps<T extends HTMLElement> = {
   ref: RefObject<T | null>; // ref to scroll container
@@ -104,6 +111,7 @@ type UseLoopReturn = {
 ```
 
 #### Hook logic
+
 1. Creates a virtual scroll space that's twice the total data size (for looping)
 2. Monitors scroll position and resets it when reaching boundaries
 3. When scroll goes below loopSize, wraps by adding loopSize
@@ -124,7 +132,9 @@ When the user scrolls to the edge, the scroll position is adjusted, creating the
 ## Components
 
 ### `ImageCarousel`
+
 Pre-built image carousel component that can be configured via props.
+
 ```typescript
 interface ImageCarouselProps extends ComponentProps<"div"> {
   data: Photo[]; // array of photo objects with download_url
@@ -134,17 +144,22 @@ interface ImageCarouselProps extends ComponentProps<"div"> {
   loop?: boolean; // enable infinite scrolling
 }
 ```
+
 ### `CarouselContainer`
+
 Main container of the carousel
 
 ### `CarouselItem`
+
 Used to render any content in the carousel
 
 ### `CarouselImage`
+
 I implemented "caching" in the image component which persists across renders and instances so that a shimmer effect is shown until the image has loaded. Otherwise especially when looping and the list items unmount & mount frequently the initial state is reset and that causes flicker of the shimmer effect
 
 ---
 
 ## See complete working examples in the codebase:
+
 - `image-carousel.tsx` - Photo carousel with infinite loop
 - `virtualised-list.tsx` - Large vertical list
